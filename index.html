@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Princess Journey</title>
+
+<style>
+body { margin: 0; overflow: hidden; font-family: "Georgia", serif; }
+#game { position: relative; width: 100vw; height: 100vh; background: #87ceeb; }
+
+#gameMenu {
+  position: fixed;
+  top: 15px;
+  right: 20px;
+  left: auto;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.menuBtn {
+  background: linear-gradient(135deg, #ff69b4, #ff1493);
+  border: none;
+  color: white;
+  font-weight: bold;
+  font-size: 15px;
+
+  padding: 9px 19px;
+  border-radius: 14px;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 0 12px rgba(255,105,180,0.6),
+    0 6px 16px rgba(0,0,0,0.3);
+
+  transition: all 0.25s ease;
+}
+
+.menuBtn:hover {
+  transform: scale(1.08);
+  box-shadow:
+    0 0 25px rgba(255,105,180,0.9);
+}
+
+#diary table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 18px;
+}
+
+#diary table td {
+  padding: 5px 8px;
+}
+
+#diary table td:first-child {
+  font-weight: bold;
+  width: 40%;
+}
+
+/* --- Storybook Princess Diary --- */
+#diary.chapter-popup {
+  inset: auto;                  
+  top: 50%; left: 50%;          
+  transform: translate(-50%, -50%);
+  width: auto;                  
+  max-width: 500px;              
+  padding: 30px;
+  
+  /* Pink gradient background */
+  background: linear-gradient(to bottom, #ffe0f0 0%, #ffc0e0 100%);
+  
+  /* Scroll-like border */
+  border: 3px solid #ff9acb;
+  border-radius: 25px;
+  position: relative;
+  
+  /* Soft shadows */
+  box-shadow: 0 8px 25px rgba(255,182,193,0.4), 0 0 15px rgba(255,182,193,0.2) inset;
+  
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  text-align: left;
+  font-family: "Georgia", serif;
+}
+
+/* --- Sparkles & Hearts --- */
+#diary.chapter-popup::before {
+  content: "✨";
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 22px;
+  animation: sparkle 1.5s infinite alternate ease-in-out;
+}
+
+#diary.chapter-popup::after {
+  content: "💖";
+  position: absolute;
+  bottom: 10px;
+  left: 15px;
+  font-size: 22px;
+  animation: sparkle 2s infinite alternate ease-in-out;
+}
+
+@keyframes sparkle {
+  0% { opacity: 0.3; transform: scale(0.8) rotate(-15deg); }
+  50% { opacity: 1; transform: scale(1.1) rotate(10deg); }
+  100% { opacity: 0.3; transform: scale(0.9) rotate(-10deg); }
+}
+
+/* --- Corner Ribbons --- */
+#diary.chapter-popup::before,
+#diary.chapter-popup::after,
+#diary.chapter-popup .ribbon-top-left,
+#diary.chapter-popup .ribbon-bottom-right {
+  pointer-events: none; /* so it doesn’t block button clicks */
+}
+
+.ribbon-top-left,
+.ribbon-bottom-right {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle at 20% 20%, #ff9acb, #ff4da6);
+  border-radius: 50%;
+  box-shadow: 0 3px 8px rgba(255,77,166,0.4);
+  z-index: 5;
+}
+
+.ribbon-top-left {
+  top: -20px;
+  left: -20px;
+}
+
+.ribbon-bottom-right {
+  bottom: -20px;
+  right: -20px;
+}
+
+/* --- Continue Button --- */
+#diary.chapter-popup #continue {
+  display: block;
+  margin: 20px auto 0; 
+  padding: 12px 28px;
+  border: none;
+  border-radius: 30px;
+  background: #ff4da6;   
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255,77,166,0.4);
+  transition: all 0.25s ease;
+}
+
+#diary.chapter-popup #continue:hover {
+  transform: scale(1.1) rotate(-2deg);
+  box-shadow: 0 6px 18px rgba(255,77,166,0.6);
+}
+
+/* --- Table styling --- */
+#diary.chapter-popup table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 18px;
+}
+
+#diary.chapter-popup table td {
+  padding: 5px 8px;
+}
+
+#diary.chapter-popup table td:first-child {
+  font-weight: bold;
+  width: 40%;
+}
+
+#diary #continue {
+  display: block;        /* makes button a block element */
+  margin: 20px auto 0;   /* top 20px, auto left/right centers it, 0 bottom */
+}
+
+#background {
+  position: absolute; width: 100%; height: 100%;
+  background: url("background1.png") repeat-x;
+  background-size: cover; background-position-x: 0;
+  top: 0; left: 0;
+  transition: background-image 1s ease-in-out;
+  will-change: background-position;
+}
+
+.bg-chapter-1 {
+  background-position-y: 30px; /* move image UP */
+  /* or background-position-y: 30px; to move DOWN */
+}
+
+/* Chapter 2 – adjust background vertical position */
+.bg-chapter-2 {
+  background-position-y: -150px; /* move UP */
+  /* use +40px to move DOWN */
+}
+
+.bg-chapter-4 {
+  background-position-y: -200px; /* move UP */
+  /* use +40px to move DOWN */
+}
+
+#car {
+  position: absolute; width: 350px; height: 250px;
+  background: url("car_empty.png") no-repeat center/contain;
+  bottom: 5px; left: 50%; transform: translateX(-50%) translateY(20px) rotate(0deg);
+  z-index: 6; will-change: transform;
+}
+
+/* --- UPDATED PRINCESS STYLES PARA SA SINGLE PNG --- */
+
+#princess {
+  position: absolute; 
+  bottom: 10px;
+  left: 100px;
+  width: 200px; 
+  height: 250px;
+  z-index: 5; 
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  display: block;
+}
+
+/* STATE 1: IDLE */
+.princess-idle {
+  background-image: url("princess_idle.png");
+  background-size: contain;
+  animation: none; 
+  transform: translateY(-10px) scale(1);
+}
+
+/* STATE 2: WALKING RIGHT */
+.princess-walk {
+  background-image: url("princess_walk_right.png"); 
+  background-size: contain;
+  transform: translateY(10px) scale(1);
+  /* Nilagyan ng bobbing animation para may konting galaw kahit 1 frame lang */
+  animation: bobbing 0.2s infinite alternate ease-in-out;
+}
+
+/* STATE 3: WALKING LEFT */
+.princess-walk-left {
+  background-image: url("princess_walk_left.png");
+  background-size: contain;
+  transform: translateY(10px) scale(1);
+  animation: bobbing 0.2s infinite alternate ease-in-out;
+}
+
+/* Animation para magmukhang tumatalbog habang naglalakad */
+@keyframes bobbing {
+  from { transform: translateY(0); }
+  to { transform: translateY(-8px); }
+}
+
+/* --- END OF UPDATED PRINCESS STYLES --- */
+
+/* --- BASE ROAD --- */
+#road {
+  position: absolute;
+  left: 0;
+  bottom: -90px;
+  width: 100%;
+  height: 140px;
+  z-index: 3;
+  pointer-events: none;
+  background-position-x: 0;
+}
+
+/* --- CHAPTER 1: DIRT PATH --- */
+.road-dirt {
+  background:
+    repeating-linear-gradient(
+      to right,
+      rgba(0,0,0,0.15) 0 30px,
+      transparent 30px 60px
+    ),
+    linear-gradient(to bottom, #390050, #af0abe);
+}
+
+/* --- CHAPTER 2: PINK PRINCESS ROAD --- */
+.road-pink {
+  background:
+    repeating-linear-gradient(
+      to right,
+      transparent 0 70px,
+      #83a244 70px 110px,
+      transparent 110px 180px
+    ),
+    linear-gradient(to bottom, #83a244, #83a244);
+}
+
+/* --- CHAPTER 3: ROCKY ROAD --- */
+.road-dirt {
+  background:
+    repeating-linear-gradient(
+      to right,
+      rgba(12, 12, 12, 0.15) 0 30px,
+      transparent 30px 60px
+    ),
+    linear-gradient(to bottom, #390050, #6f0250);
+}
+
+/* --- CHAPTER 4: HILLY ROAD ILLUSION --- */
+.road-hilly {
+  background:
+    repeating-linear-gradient(
+      to right,
+      rgba(255, 142, 204, 0.507) 0 30px,
+      transparent 30px 60px
+    ),
+    linear-gradient(to bottom, #ff69be, #ff69be);
+}
+
+.road-special {
+  background:
+    repeating-linear-gradient(
+      to right,
+      rgba(255,215,0,0.3) 0 30px,
+      transparent 40px 80px
+    ),
+    linear-gradient(to bottom, #ffd700, #ffa500);
+}
+
+@keyframes hillMove {
+  from { transform: translateY(0); }
+  to { transform: translateY(-6px); }
+}
+
+/* Start Overlay adjustments */
+#startOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 500;
+  text-align: center;
+}
+
+/* Title at top of overlay */
+#startTitle {
+  color: white;
+  font-weight: bold;
+  font-size: 48px;       /* Adjust size if needed */
+  margin-bottom: 40px;   /* Space between title and button */
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  text-shadow:
+    -2px -2px 0 #ff4da6,
+     2px -2px 0 #ff4da6,
+    -2px  2px 0 #ff4da6,
+     2px  2px 0 #ff4da6,
+     0   0  12px rgba(255,77,166,0.6);
+
+  letter-spacing: 2px;
+}
+
+/* Start button smaller and centered */
+#startButton {
+  padding: 16px 40px;    /* smaller than before */
+  font-size: 24px;       /* smaller font */
+  background: #c2185b;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(255,77,166,0.4);
+  transition: all 0.25s ease;
+}
+
+#startButton:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(255,77,166,0.6);
+}
+
+/* Tutorial Overlay */
+#tutorialOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 600;
+}
+
+/* Tutorial Box */
+#tutorialBox {
+  background: linear-gradient(180deg, #ffe0f5, #ffc0eb);
+  border: 3px solid #ff69b4;
+  border-radius: 25px;
+  padding: 35px;
+  width: 420px;
+  text-align: center;
+  box-shadow:
+    0 0 30px rgba(255,105,180,0.6),
+    0 10px 25px rgba(0,0,0,0.4);
+}
+
+#tutorialBox h2 {
+  color: #c2185b;
+  margin-bottom: 20px;
+}
+
+#tutorialBox p {
+  font-size: 18px;
+  margin: 10px 0;
+}
+
+/* Start Game Button */
+#startGameBtn {
+  margin-top: 20px;
+  padding: 14px 30px;
+  font-size: 18px;
+  border: none;
+  border-radius: 30px;
+  background: #ff1493;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 6px 15px rgba(255,20,147,0.4);
+}
+
+#startGameBtn:hover {
+  transform: scale(1.08);
+}
+
+/* Restart Button */
+#restartBtn {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px 50px;
+  font-size: 28px;
+  font-family: "Georgia", serif;
+  background: #c2185b;
+  color: white;
+  border: none;
+  border-radius: 40px;
+  cursor: pointer;
+  opacity: 0;               /* hidden initially */
+  z-index: 1002;            /* above everything */
+  transition: opacity 1s ease, transform 0.3s ease;
+  pointer-events: none;     /* disabled until shown */
+}
+
+#restartBtn:hover {
+  transform: translate(-50%, -50%) scale(1.08);
+  background: #d81b60;
+}
+
+/* Floating hearts & sparkles container */
+#floatingEffects {
+  position: fixed;
+  inset: 0;
+  pointer-events: none; /* doesn't block button clicks */
+  overflow: visible;    /* IMPORTANT: lets them move freely */
+  z-index: 999;         /* above everything to show fireworks */
+}
+
+/* Each floating element */
+.floating {
+  position: absolute;
+  font-size: 24px;
+  opacity: 0.8;
+  animation: floatUp linear infinite;
+  user-select: none;
+}
+
+/* Floating animation */
+@keyframes floatUp {
+  0% { transform: translateY(100vh) scale(0.6); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(-20vh) scale(1); opacity: 0; }
+}
+
+.coin, .gift { position: absolute; background-repeat: no-repeat; background-position: center; background-size: contain; z-index: 4; display: none; }
+.coin { width: 50px; height: 50px; background-image: url("coin.png"); animation: spin 1s linear infinite; }
+.gift { width: 80px; height: 80px; background-image: url("gift.png"); }
+@keyframes spin { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+
+#hud {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+
+  padding: 14px 22px;
+  border-radius: 18px;
+
+  /* Pink Princess Gradient */
+  background: linear-gradient(
+    135deg,
+    rgba(255,182,193,0.95),
+    rgba(255,105,180,0.9)
+  );
+
+  color: white;
+  font-weight: bold;
+  font-size: 20px;
+
+  /* Glow + Shadow */
+  box-shadow:
+    0 0 15px rgba(255,105,180,0.6),
+    0 6px 18px rgba(0,0,0,0.25);
+
+  /* Glass blur */
+  backdrop-filter: blur(6px);
+
+  border: 2px solid rgba(255,255,255,0.4);
+
+  z-index: 20;
+}
+
+#diary { position: absolute; inset: 0; background: rgba(255,248,240,0.97); display: none; justify-content: center; align-items: center; text-align: center; padding: 40px; z-index: 100; }
+#diaryContent { max-width: 600px; }
+#diary h2 { color: #c2185b; font-size: 30px; }
+#diary p { font-size: 18px; line-height: 1.7; }
+#continue { margin-top: 25px; padding: 12px 28px; border: none; border-radius: 30px; background: #c2185b; color: white; font-size: 16px; cursor: pointer; }
+
+#floatingEffects {
+  filter: brightness(1.2) contrast(1.1);
+}
+
+/* 🎆 Realistic Fireworks */
+.firework {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+@keyframes fireworkFade {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.chapter-1 #princess { bottom: -10px; }
+.chapter-1 #car { bottom: -10px; }
+
+</style>
+</head>
+
+<body>
+
+<div id="restartBtn">Start Again</div>
+<div id="floatingEffects"></div>
+
+<div id="game">
+  <div id="startOverlay">
+  <h1 id="startTitle">᯽˖Interactive Resume˖᯽</h1>
+  <button id="startButton">START JOURNEY</button>
+</div>
+
+<div id="tutorialOverlay">
+  <div id="tutorialBox">
+    <h2>🎮 How To Play</h2>
+
+    <p>✨ Use <b>LEFT</b> and <b>RIGHT Arrow Keys</b> to move</p>
+    <p>🚗 Walk to the car to start driving</p>
+    <p>🪙 Collect coins to increase score</p>
+    <p>🎁 Collect gifts to unlock chapters</p>
+    <p>🏰 Reach the castle to finish the journey</p>
+
+    <button id="startGameBtn">Start Adventure</button>
+  </div>
+</div>
+
+<div id="gameMenu">
+  <button class="menuBtn" onclick="openResume()">
+    📖 Open Resume
+  </button>
+</div>
+
+  <div id="background"></div>
+  <div id="road" class="road-dirt"></div>
+  <div id="car"></div>
+  <div id="princess" class="princess-idle"></div>
+
+  <div id="hud">
+    Chapter: <span id="level">1</span><br>
+    Coins: <span id="coinsCollected">0</span>
+  </div>
+
+  <div id="diary"><div id="diaryContent"></div></div>
+
+  <audio id="music" loop><source src="bg-music.mp3" type="audio/mpeg"></audio>
+</div>
+
+<script>
+let fireworksInterval;
+
+function createFireworks() {
+  const container = document.getElementById("floatingEffects");
+
+  // More realistic color palette
+  const colors = [
+    "#ff0043", "#ff8c00", "#ffd700", "#00e5ff",
+    "#7cff00", "#ff00e6", "#ffffff", "#ff4da6"
+  ];
+
+  // Firework burst position
+  const centerX = Math.random() * window.innerWidth;
+  const centerY = 120 + Math.random() * 300;
+
+  const particles = [];
+
+  // Create particles
+  for (let i = 0; i < 70; i++) {
+
+    const p = document.createElement("div");
+    p.className = "firework";
+    container.appendChild(p);
+
+    const angle = Math.random() * Math.PI * 2;
+    const speed = Math.random() * 5 + 3;
+    const size = Math.random() * 4 + 2;
+
+    const color = colors[Math.floor(Math.random() * colors.length)];
+
+    p.style.width = size + "px";
+    p.style.height = size + "px";
+    p.style.background = color;
+    p.style.left = centerX + "px";
+    p.style.top = centerY + "px";
+    p.style.boxShadow = `0 0 10px ${color}, 0 0 20px ${color}`;
+
+    particles.push({
+      el: p,
+      x: centerX,
+      y: centerY,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life: 0,
+      maxLife: 60 + Math.random() * 20
+    });
+  }
+
+  // Smooth animation loop
+  function animate() {
+
+    particles.forEach((pt, index) => {
+
+      pt.vx *= 0.985;        // air resistance
+      pt.vy += 0.08;         // gravity
+
+      pt.x += pt.vx;
+      pt.y += pt.vy;
+
+      pt.life++;
+
+      pt.el.style.left = pt.x + "px";
+      pt.el.style.top = pt.y + "px";
+
+      // Fade out
+      pt.el.style.opacity = 1 - pt.life / pt.maxLife;
+
+      if (pt.life >= pt.maxLife) {
+        pt.el.remove();
+        particles.splice(index, 1);
+      }
+    });
+
+    if (particles.length > 0) {
+      requestAnimationFrame(animate);
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+function startFireworks() {
+  // create new fireworks every 0.8 seconds
+  fireworksInterval = setInterval(createFireworks, 800);
+}
+
+function openResume() {
+  window.open(
+    "https://docs.google.com/document/d/14cYt3Rzq3uRA9O1nn3fDdnxJ05d7x-7d/edit",
+    "_blank"
+  );
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+const startOverlay = document.getElementById("startOverlay");
+const startButton = document.getElementById("startButton");
+const restartBtn = document.getElementById("restartBtn");
+const bg = document.getElementById("background");
+const car = document.getElementById("car");
+const princess = document.getElementById("princess");
+const diary = document.getElementById("diary");
+const diaryContent = document.getElementById("diaryContent");
+const levelText = document.getElementById("level");
+const road = document.getElementById("road");
+const coinsText = document.getElementById("coinsCollected");
+const music = document.getElementById("music");
+
+const STATE = { START: 0, BOARDING: 1, DRIVING: 2, PAUSED: 3 };
+let currentState = STATE.START;
+
+let level = 1;
+let coinsCollected = 0;
+let bgX = 0;
+let items = [];
+let carTilt = 0; 
+let princessX = 100; 
+
+let pMovingLeft = false, pMovingRight = false;
+let cMovingLeft = false, cMovingRight = false;
+
+function createItem(index) {
+  const isGift = (index + 1) % 4 === 0;
+  const el = document.createElement("div");
+  el.className = isGift ? "gift" : "coin";
+  let worldX = (window.innerWidth / 2) + 800 + (index * 550);
+  el.style.bottom = isGift ? "60px" : "70px"; 
+  document.getElementById("game").appendChild(el);
+  return { el: el, worldX: worldX, type: isGift ? 'gift' : 'coin' };
+}
+
+for (let i = 0; i < 8; i++) items.push(createItem(i));
+
+const story = [
+  { 
+    title: "Chapter 1: Personal Information", 
+    text: `
+      <table style="width:100%; border-collapse: collapse; font-size: 18px;">
+        <tr><td style="font-weight:bold; padding:5px;">Name:</td><td style="padding:5px;">Aimie Cris B. Raotraot</td></tr>
+        <tr><td style="font-weight:bold; padding:5px;">Gender:</td><td style="padding:5px;">Female</td></tr>
+        <tr><td style="font-weight:bold; padding:5px;">Nationality:</td><td style="padding:5px;">Filipino</td></tr>
+        <tr><td style="font-weight:bold; padding:5px;">Birthdate:</td><td style="padding:5px;">August 25, 2004</td></tr>
+        <tr><td style="font-weight:bold; padding:5px;">Address:</td><td style="padding:5px;">Manuyo Uno, Las Pinas City</td></tr>
+        <tr><td style="font-weight:bold; padding:5px;">Contact Number:</td><td style="padding:5px;">09922050820</td></tr>
+        <tr><td style="font-weight:bold; padding:5px;">Email:</td><td style="padding:5px;">aimiecrisraotraot@gmail.com</td></tr></table>`, bg: "background1.png" },
+  { 
+    title: "Chapter 2: Career Objective", 
+    text: `
+      <table style="width:100%; border-collapse: collapse; font-size: 18px; text-align:center;">
+        <tr>
+          <td style="font-weight:normal; padding:5px;">
+            Aspiring Computer Engineering graduate seeking an opportunity to apply academic knowledge, 
+            gain practical experience, enhance skills, and grow professionally in a dynamic environment.
+          </td>
+        </tr>
+      </table>
+    `,
+    bg: "background2.png"},
+  { 
+  title: "Chapter 3: Education", 
+  text: `
+    <table style="width:100%; border-collapse: collapse; font-size: 18px; text-align:left;">
+      <tr>
+        <td style="font-weight:bold; padding:5px;">Polytechnic University of The Philippines - Parañaque City Campus</td>
+        <td style="padding:5px;">
+          🩷BS in Computer Engineering (September 2023 - Present)<br>
+          🩷Student of Computer Engineering with Natural Excellence (September 2023 - Present)<br>
+          🩷Business Manager - SCENE Organization (Present)
+        </td>
+      </tr>
+      <tr>
+        <td style="font-weight:bold; padding:5px;">Las Piñas City National Senior High School - Manuyo Campus</td>
+        <td style="padding:5px;">
+          🩷G.A.S Strand (2021 - 2023)
+        </td>
+      </tr>
+      <tr>
+        <td style="font-weight:bold; padding:5px;">Tudela National Comprehensive High School</td>
+        <td style="padding:5px;">
+          🩷Junior High School (2017 - 2021)<br>
+          🩷Special Program in the Arts - Media Arts Students (2018 - 2021)
+        </td>
+      </tr>
+    </table>
+  `,
+  bg: "background3.png" }
+  ,
+{ 
+  title: "Chapter 4: Skills", 
+  text: `
+    <table style="width:100%; border-collapse: collapse; font-size: 18px; text-align:left;">
+      <tr>
+        <td style="font-weight:bold; padding:6px;">Programming</td>
+        <td style="padding:6px;">
+          🩷 CSS, HTML, JavaScript, Python, RStudio <i>(Basic proficiency)</i>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="font-weight:bold; padding:6px;">Software</td>
+        <td style="padding:6px;">
+          🩷 AutoCAD, TinkerCAD, Figma <i>(Proficient)</i>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="font-weight:bold; padding:6px;">Productivity Tools</td>
+        <td style="padding:6px;">
+          🩷 Microsoft Office, Canva, Excel <i>(Proficient)</i>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="font-weight:bold; padding:6px;">Creative Skills</td>
+        <td style="padding:6px;">
+          🩷 Designing & Editing (Photo, Video, Tarpaulin, etc.)
+        </td>
+      </tr>
+
+      <tr>
+        <td style="font-weight:bold; padding:6px;">Languages</td>
+        <td style="padding:6px;">
+          🩷 Bisaya<br>
+          🩷 Filipino<br>
+          🩷 English
+        </td>
+      </tr>
+    </table>
+  `,
+  bg: "background4.png"},
+];
+
+function resetControls() {
+  pMovingLeft = false; pMovingRight = false;
+  cMovingLeft = false; cMovingRight = false;
+  princess.className = "princess-idle";
+}
+
+document.addEventListener("keydown", e => {
+  if (currentState === STATE.PAUSED || currentState === STATE.START) return;
+  
+  if (currentState === STATE.BOARDING) {
+    if (e.key === "ArrowRight") { pMovingRight = true; princess.className = "princess-walk"; }
+    if (e.key === "ArrowLeft") { pMovingLeft = true; princess.className = "princess-walk-left"; }
+  } else if (currentState === STATE.DRIVING) {
+    if (e.key === "ArrowRight") cMovingRight = true;
+    if (e.key === "ArrowLeft") cMovingLeft = true;
+  }
+});
+
+document.addEventListener("keyup", e => {
+  if (currentState === STATE.BOARDING) {
+    if (e.key === "ArrowRight") pMovingRight = false;
+    if (e.key === "ArrowLeft") pMovingLeft = false;
+    if (!pMovingRight && !pMovingLeft) princess.className = "princess-idle";
+  } else if (currentState === STATE.DRIVING) {
+    if (e.key === "ArrowRight") cMovingRight = false;
+    if (e.key === "ArrowLeft") cMovingLeft = false;
+  }
+});
+
+startButton.onclick = () => {
+  startOverlay.style.display = "none";
+  tutorialOverlay.style.display = "flex";
+};
+
+document.getElementById("startGameBtn").onclick = () => {
+  document.getElementById("tutorialOverlay").style.display = "none";
+  currentState = STATE.BOARDING;
+  music.play().catch(() => {});
+  gameLoop();
+};
+
+// Placeholder for floating effects (disabled)
+function createFloatingEffects() {
+  // Floating effects disabled
+}
+
+function gameLoop() {
+  if (currentState === STATE.PAUSED) {
+    requestAnimationFrame(gameLoop);
+    return;
+  }
+
+  if (currentState === STATE.BOARDING) {
+    if (pMovingRight) princessX += 5;
+    if (pMovingLeft) princessX -= 5;
+    princess.style.left = princessX + "px";
+
+    const carRect = car.getBoundingClientRect();
+    const pRect = princess.getBoundingClientRect();
+
+    if (pRect.left > carRect.left && pRect.right < carRect.right) {
+      currentState = STATE.DRIVING;
+      princess.style.display = "none";
+      car.style.backgroundImage = "url('forward.png')";
+      car.style.transform = "translateX(-50%) scale(3.00)";
+      items.forEach(i => i.el.style.display = "block");
+      resetControls();
+    }
+  }
+
+  if (currentState === STATE.DRIVING) {
+    if (cMovingRight) { bgX -= 11; carTilt = Math.min(carTilt + 0.5, 4); } 
+    else if (cMovingLeft) { bgX += 11; carTilt = Math.max(carTilt - 0.5, -4); } 
+    else { carTilt *= 0.9; }
+
+    car.style.transform = `translateX(-50%) rotate(${carTilt}deg)`;
+    bg.style.backgroundPositionX = bgX + "px";
+    road.style.backgroundPositionX = bgX + "px";
+
+    items.forEach((itemObj) => {
+      let currentPos = itemObj.worldX + bgX;
+      itemObj.el.style.left = currentPos + "px";
+      if (currentPos < -150) {
+        let maxPos = Math.max(...items.map(i => i.worldX));
+        itemObj.worldX = maxPos + 550;
+        itemObj.el.style.display = "block";
+      }
+      const carRect = car.getBoundingClientRect();
+      const itemRect = itemObj.el.getBoundingClientRect();
+      if (itemObj.el.style.display !== "none" &&
+          carRect.left < itemRect.right && carRect.right > itemRect.left &&
+          carRect.top < itemRect.bottom && carRect.bottom > itemRect.top) {
+        if (itemObj.type === 'coin') {
+          itemObj.el.style.display = "none";
+          coinsCollected++;
+          coinsText.textContent = coinsCollected;
+        } else {
+          itemObj.el.style.display = "none";
+          openDiary();
+        }
+      }
+    });
+  }
+  requestAnimationFrame(gameLoop);
+}
+
+function openDiary() {
+  currentState = STATE.PAUSED;
+  resetControls(); 
+  const content = story[level - 1] || story[story.length - 1];
+  diaryContent.innerHTML = `<h2>${content.title}</h2><p>${content.text}</p><button id="continue">Continue Journey</button>`;
+  diary.style.display = "flex";
+  diary.classList.add("chapter-popup"); // apply centered, auto-sized popup
+  // Remove previous ribbons if any
+document.querySelectorAll('#diary .ribbon-top-left, #diary .ribbon-bottom-right')
+        .forEach(el => el.remove());
+
+// Add new ribbons
+const ribbonTL = document.createElement('div');
+ribbonTL.className = 'ribbon-top-left';
+diary.appendChild(ribbonTL);
+
+const ribbonBR = document.createElement('div');
+ribbonBR.className = 'ribbon-bottom-right';
+diary.appendChild(ribbonBR);
+
+  document.getElementById("continue").onclick = () => {
+  diary.style.display = "none";
+  level++;
+
+  // ✅ CHAPTER 5 / FINAL DESTINATION
+if (level > story.length) {
+  currentState = STATE.PAUSED;
+  diary.style.display = "none";
+
+  // Hide coins/gifts
+  items.forEach(i => i.el.style.display = "none");
+
+  car.style.backgroundImage = "url('car_empty.png')";
+  car.style.bottom = "-15px";
+
+  // Add castle
+  const castle = document.createElement("div");
+  castle.id = "castle";
+  castle.style.position = "absolute";
+  castle.style.bottom = "-28px";
+  castle.style.right = "-100px";
+  castle.style.width = "500px";
+  castle.style.height = "550px";
+  castle.style.backgroundImage = "url('castle.png')";
+  castle.style.backgroundSize = "contain";
+  castle.style.backgroundRepeat = "no-repeat";
+  castle.style.zIndex = "4";
+  document.getElementById("game").appendChild(castle);
+
+  // Place princess beside car
+  princessX = window.innerWidth / 2 - 150; // Start beside car (center-left)
+  princess.style.left = princessX + "px";
+  princess.style.bottom = "10px";
+  princess.style.display = "block";
+  princess.className = "princess-walk";
+
+  // Move princess toward castle
+  const castleX = window.innerWidth - 250;
+  const walkInterval = setInterval(() => {
+    princessX += 5;
+    princess.style.left = princessX + "px";
+    if(princessX >= castleX) {
+      clearInterval(walkInterval);
+      princess.style.display = "none"; // hide princess
+      princess.style.transition = "opacity 1s ease";
+      princess.style.opacity = 0;
+      setTimeout(() => { princess.style.display = "none"; }, 1000);
+      console.log("Princess reached castle!");
+      
+      // Fireworks keep going until restart
+      startFireworks();
+
+      // Fade music
+      let fade = setInterval(() => {
+        if (music.volume > 0.05) music.volume -= 0.05;
+        else { music.volume = 0; music.pause(); clearInterval(fade); }
+      }, 200);
+
+      // Show Restart Button
+      const restartBtn = document.getElementById("restartBtn");
+      console.log("Showing restart button:", restartBtn);
+      restartBtn.style.opacity = "1";
+      restartBtn.style.pointerEvents = "auto";
+      console.log("Restart button shown!");
+    }
+  }, 30);
+
+  return;
+}
+
+  if (story[level - 1]) {
+    bg.style.backgroundImage = `url("${story[level - 1].bg}")`;
+  }
+
+  bg.className = level === 2 ? "bg-chapter-2" : "";
+  levelText.textContent = level;
+
+  resetControls();
+  road.className =
+    level === 1 ? "road-dirt" :
+    level === 2 ? "road-pink" :
+    level === 3 ? "road-rocky" :
+    level === 4 ? "road-hilly" :
+    level === 5 ? "road-special" :
+    "road-dirt";
+  currentState = STATE.DRIVING;};
+  };
+});
+
+function showRestartButton() {
+  document.getElementById("restartBtn").style.opacity = "1";
+}
+
+document.getElementById("restartBtn").addEventListener("click", () => {
+  clearInterval(fireworksInterval); // stop the continuous fireworks
+  location.reload();
+});
+
+</script>
+
+</body>
+</html>
